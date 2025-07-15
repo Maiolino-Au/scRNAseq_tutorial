@@ -37,6 +37,6 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/scrnaseq_tutorial:latest
-            ghcr.io/scrnaseq_tutorial:${{ steps.meta.outputs.version }}
+            ghcr.io/maiolino-au/scrnaseq_tutorial:latest
+            ghcr.io/maiolino-au/scrnaseq_tutorial:${{ steps.meta.outputs.version }}
           labels: ${{ steps.meta.outputs.labels }}
