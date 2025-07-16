@@ -12,7 +12,7 @@ This tutorial is designed to guide you through the process of analyzing single-c
 
 All matherials and code for this tutorial are available on [GitHub](https://github.com/Maiolino-Au/scRNAseq_tutorial)
 
-\newpage
+
 
 # The working Environment - Docker - WORK IN PROGRESS
 To ensure a consistene and reproducible environement for the analysis, it is reccomended to use a Docker container. Docker allows to create a virtual environemnt that contains all the necessary software and dependencies for the analysis. This way, you can avoid issues related to different versions of R, Seurat, and other packages. With proper version control, you can ensure that the analysis will run smoothly and produce consistent results, even years after the initial analysis.
@@ -210,7 +210,7 @@ docker pull satijalab/seurat:5.0.0
 
 
 
-\newpage
+
 
 # Obtaining the data - WORK IN PROGRESS
 
@@ -268,7 +268,7 @@ for (f in gz_files) {
 unlink(tar_file)
 ```
 
-\newpage
+
 
 # Processing - WORK IN PROGRESS
 
@@ -346,7 +346,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
 
-\newpage
+
 
 # Analysis - WORK IN PROGRESS
 
