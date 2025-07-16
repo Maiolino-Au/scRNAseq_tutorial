@@ -232,7 +232,7 @@ Expecially when working with multiple datasets it is faster to download the data
 
 To dowload with R, you will need to install the `curl` and `R.utils` packages if they are not already installed.
 
-```{r, eval=FALSE}
+```R
 # Load required packages
 if (!requireNamespace("curl", quietly = TRUE)) install.packages("curl")
 if (!requireNamespace("R.utils", quietly = TRUE)) install.packages("R.utils")
@@ -242,7 +242,7 @@ library(R.utils)
 ```
 
 
-```{r, eval=FALSE}
+```R
 # URL and destination
 ftp_tar <- "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE150nnn/GSE150728/suppl/GSE150728_RAW.tar"
 dest_dir <- "/sharedFolder/Data"
@@ -278,7 +278,7 @@ unlink(tar_file)
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -287,7 +287,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -296,7 +296,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -305,7 +305,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -314,7 +314,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -323,7 +323,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -332,7 +332,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -341,7 +341,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -352,7 +352,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -361,7 +361,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -370,7 +370,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
