@@ -10,16 +10,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     sudo wget zlib1g-dev libbz2-dev liblzma-dev libncurses5-dev pandoc git && \
     rm -rf /var/lib/apt/lists/*
 
+# Add the CRAN GPG key and repository for R
+RUN curl -fsSL https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | gpg --dearmor -o /usr/share/keyrings/cran.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/cran.gpg] https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
+    | tee /etc/apt/sources.list.d/cran-r.list
+
 # Set the user as a non-root to avoid permission issues
 ARG USERNAME=containeruser
 RUN useradd -u 1000 -m -s /bin/bash $USERNAME
 USER $USERNAME
 WORKDIR /home/$USERNAME
 
-# Add the CRAN GPG key and repository for R
-RUN curl -fsSL https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | gpg --dearmor -o /usr/share/keyrings/cran.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/cran.gpg] https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
-    | tee /etc/apt/sources.list.d/cran-r.list
 # Update again and install R
 RUN sudo apt update && sudo apt install -y --no-install-recommends r-base
 
