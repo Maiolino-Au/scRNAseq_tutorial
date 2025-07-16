@@ -240,7 +240,7 @@ Expecially when working with multiple datasets it is faster to download the data
 
 To dowload with R, you will need to install the `curl` and `R.utils` packages if they are not already installed.
 
-```{r, eval=FALSE}
+```R
 # Load required packages
 if (!requireNamespace("curl", quietly = TRUE)) install.packages("curl")
 if (!requireNamespace("R.utils", quietly = TRUE)) install.packages("R.utils")
@@ -250,7 +250,7 @@ library(R.utils)
 ```
 
 
-```{r, eval=FALSE}
+```R
 # URL and destination
 ftp_tar <- "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE150nnn/GSE150728/suppl/GSE150728_RAW.tar"
 dest_dir <- "/sharedFolder/Data"
@@ -289,7 +289,7 @@ unlink(tar_file)
 ### Load the spares matrix separately - WORK IN PROGRESS
 
 
-```{r, eval=FALSE}
+```R
 library(Matrix)
 library(stats)
 
@@ -302,7 +302,7 @@ barcodes <- readLines("/sharedFolder/Data/barcodes.tsv.gz")
 ### Load via 10X - WORK IN PROGRESS
 
 
-```{r, eval=FALSE}
+```R
 raw_data <- Read10X(
     data.dir = "/sharedFolder/Data/directory",
     gene.column = 1
@@ -310,7 +310,7 @@ raw_data <- Read10X(
 ```
 
 
-```{r, eval=FALSE}
+```R
 sc_data <- CreateSeuratObject(
     counts = raw_data,
     min.cells = 3,
@@ -325,7 +325,7 @@ sc_data <- CreateSeuratObject(
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -334,14 +334,14 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```{r, eval=FALSE}
+```R
 # check whether you are getting the genes you want
 grep("^mt-", rownames(sc_data@assays$RNA@data), value = T)
 grep("Rps|Rpl|Mrpl|Mrps", rownames(sc_data@assays$RNA@data), value = T)
 ```
 
 
-```{r, eval=FALSE}
+```R
 # add the percentage of these mitochondrial or ribosomal genes to the meta.data
 sc_data[["percent.mito"]] <- PercentageFeatureSet(
     object = sc_data,
@@ -354,7 +354,7 @@ sc_data[["percent.ribo"]] <- PercentageFeatureSet(
 ```
 
 
-```{r, eval=FALSE}
+```R
 # Subset the data based on the number of features and the percentage of mitochondrial and ribosomal genes
 sc_data <- subset(
     x = sc_data,
@@ -367,7 +367,7 @@ sc_data <- subset(
 
 
 
-```{r, eval=FALSE}
+```R
 sc_data <- NormalizeData(
     sc_data,
     normalization.method = "LogNormalize",
@@ -379,7 +379,7 @@ sc_data <- NormalizeData(
 
 
 
-```{r, eval=FALSE}
+```R
 # Find variable features
 sc_data <- FindVariableFeatures(
     sc_data,
@@ -395,7 +395,7 @@ sc_data <- ScaleData(sc_data)
 
 
 
-```{r, eval=FALSE}
+```R
 # PCA
 sc_data <- RunPCA(
     sc_data,
@@ -404,13 +404,13 @@ sc_data <- RunPCA(
 ```
 
 
-```{r, eval=FALSE}
+```R
 # UMAP
 sc_data_UMAP <- RunUMAP(sc_data, dims = 1:40)
 ```
 
 
-```{r, eval=FALSE}
+```R
 # Visualize UMAP
 UMAP_plot <- DimPlot(sc_data_UMAP, reduction = "umap", label = TRUE, pt.size = 1) +
     ggtitle("UMAP of scRNAseq data")
@@ -428,14 +428,14 @@ ggsave(
 
 ### Clusterization method 1 - WORK IN PROGRESS
 
-```{r, eval=FALSE}
+```R
 sc_data <- FindNeighbors(sc_data, dims = 1:40)
 sc_data <- FindClusters(sc_data, resolution = 1)
 ```
 
 ### Clusterization method 2 - WORK IN PROGRESS
 
-```{r, eval=FALSE}
+```R
 sc_data <- FindNeighbors(dasc_datata, dims = 1:40)
 sc_data <- FindClusters(sc_data, resolution = 1)
 ```
@@ -444,7 +444,7 @@ sc_data <- FindClusters(sc_data, resolution = 1)
 
 
 
-```{r, eval=FALSE}
+```R
 markers <- FindAllMarkers(
     sc_data,
     only.pos = TRUE, # Only considers positive markers
@@ -457,7 +457,7 @@ markers <- FindAllMarkers(
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -468,7 +468,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -477,7 +477,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -486,7 +486,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```{r, eval=FALSE}
+```R
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
