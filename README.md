@@ -43,6 +43,14 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive 
 ```
 
+ - WORK IN PROGRESS: add the lines for the user autorizations (on telegram)
+
+```dockerfile
+RUN useradd -u 1000 -m -s /bin/bash nuvobea
+USER nuvobea
+WORKDIR /home/nuvobea
+```
+
 The base Ubuntu image is preatty bare, it does not contain any additional software or packages, just the operating system. To make it suitable for our tasks and for the installation of our required software, we need to install various packages. These packages include essential tools and libraries that are required for running R, Seurat, and Jupyter Lab. The following command installs a set of packages that are commonly used in data analysis and scientific computing.
 
 ```dockerfile
@@ -206,7 +214,7 @@ You can find various prebuilt images, one that might be usefull is the `satijala
 docker pull satijalab/seurat:5.0.0
 ```
 
-## Credo - a better and faster way to build Docker images - WORK IN PROGRESS
+## Credo: a better and faster way to build Docker images - WORK IN PROGRESS
 
 
 
@@ -232,7 +240,7 @@ Expecially when working with multiple datasets it is faster to download the data
 
 To dowload with R, you will need to install the `curl` and `R.utils` packages if they are not already installed.
 
-```R
+```{r, eval=FALSE}
 # Load required packages
 if (!requireNamespace("curl", quietly = TRUE)) install.packages("curl")
 if (!requireNamespace("R.utils", quietly = TRUE)) install.packages("R.utils")
@@ -242,7 +250,7 @@ library(R.utils)
 ```
 
 
-```R
+```{r, eval=FALSE}
 # URL and destination
 ftp_tar <- "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE150nnn/GSE150728/suppl/GSE150728_RAW.tar"
 dest_dir <- "/sharedFolder/Data"
@@ -278,70 +286,178 @@ unlink(tar_file)
 
 
 
-```R
-# mmmmmm
-mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+### Load the spares matrix separately - WORK IN PROGRESS
+
+
+```{r, eval=FALSE}
+library(Matrix)
+library(stats)
+
+# Load matrix and metadata
+mat <- readMM("/sharedFolder/Data/matrix.mtx.gz")
+genes <- readLines("/sharedFolder/Data/features.tsv.gz")
+barcodes <- readLines("/sharedFolder/Data/barcodes.tsv.gz")
+```
+
+### Load via 10X - WORK IN PROGRESS
+
+
+```{r, eval=FALSE}
+raw_data <- Read10X(
+    data.dir = "/sharedFolder/Data/directory",
+    gene.column = 1
+)
+```
+
+
+```{r, eval=FALSE}
+sc_data <- CreateSeuratObject(
+    counts = raw_data,
+    min.cells = 3,
+    min.features = 500,
+    project = "scRNAseq_tutorial",
+    names.delim = "-",
+    names.field = 2
+)
 ```
 
 ## Reads allignment - WORK IN PROGRESS
 
 
 
-```R
+```{r, eval=FALSE}
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
+
+## Filter the cells - WORK IN PROGRESS
+
+
+
+```{r, eval=FALSE}
+# check whether you are getting the genes you want
+grep("^mt-", rownames(sc_data@assays$RNA@data), value = T)
+grep("Rps|Rpl|Mrpl|Mrps", rownames(sc_data@assays$RNA@data), value = T)
+```
+
+
+```{r, eval=FALSE}
+# add the percentage of these mitochondrial or ribosomal genes to the meta.data
+sc_data[["percent.mito"]] <- PercentageFeatureSet(
+    object = sc_data,
+    pattern = "^mt-"
+)
+sc_data[["percent.ribo"]] <- PercentageFeatureSet(
+    object = sc_data,
+    pattern = "Rps|Rpl|Mrpl|Mrps"
+)
+```
+
+
+```{r, eval=FALSE}
+# Subset the data based on the number of features and the percentage of mitochondrial and ribosomal genes
+sc_data <- subset(
+    x = sc_data,
+    subset = nFeature_RNA > 200 & nFeature_RNA < 8000 & percent.mito < 25 & percent.ribo < 40
+)
+```
+
 
 ## Normalization - WORK IN PROGRESS
 
 
 
-```R
-# mmmmmm
-mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```{r, eval=FALSE}
+sc_data <- NormalizeData(
+    sc_data,
+    normalization.method = "LogNormalize",
+    scale.factor = 1e6
+)
 ```
 
-## Scaling - WORK IN PROGRESS
+## Variable features and Scaling - WORK IN PROGRESS
 
 
 
-```R
-# mmmmmm
-mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```{r, eval=FALSE}
+# Find variable features
+sc_data <- FindVariableFeatures(
+    sc_data,
+    selection.method = "mvp",
+    nfeatures = 2000
+)
+
+# Scale the data
+sc_data <- ScaleData(sc_data)
 ```
 
 ## Dimensionality Reduction - WORK IN PROGRESS
 
 
 
-```R
-# mmmmmm
-mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```{r, eval=FALSE}
+# PCA
+sc_data <- RunPCA(
+    sc_data,
+    npcs = 40
+)
+```
+
+
+```{r, eval=FALSE}
+# UMAP
+sc_data_UMAP <- RunUMAP(sc_data, dims = 1:40)
+```
+
+
+```{r, eval=FALSE}
+# Visualize UMAP
+UMAP_plot <- DimPlot(sc_data_UMAP, reduction = "umap", label = TRUE, pt.size = 1) +
+    ggtitle("UMAP of scRNAseq data")
+print(plot)
+
+# Save the UMAP plot
+ggsave(
+    filename = "UMAP_scRNAseq_data.png",
+    plot = UMAP_plot,
+    width = 1920, height = 1080, units = "px"
+)
 ```
 
 ## Clustering - WORK IN PROGRESS
 
+### Clusterization method 1 - WORK IN PROGRESS
 
+```{r, eval=FALSE}
+sc_data <- FindNeighbors(sc_data, dims = 1:40)
+sc_data <- FindClusters(sc_data, resolution = 1)
+```
 
-```R
-# mmmmmm
-mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+### Clusterization method 2 - WORK IN PROGRESS
+
+```{r, eval=FALSE}
+sc_data <- FindNeighbors(dasc_datata, dims = 1:40)
+sc_data <- FindClusters(sc_data, resolution = 1)
 ```
 
 ## Finding the most expressed markers - WORK IN PROGRESS
 
 
 
-```R
-# mmmmmm
-mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```{r, eval=FALSE}
+markers <- FindAllMarkers(
+    sc_data,
+    only.pos = TRUE, # Only considers positive markers
+    min.pct = 0.25, # Minimum percentage of cells expressing the gene
+    logfc.threshold = 0.25, # Minimum log fold change
+)
 ```
 
 ## Cell type annotation - WORK IN PROGRESS
 
 
 
-```R
+```{r, eval=FALSE}
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -352,7 +468,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```R
+```{r, eval=FALSE}
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -361,7 +477,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```R
+```{r, eval=FALSE}
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
@@ -370,7 +486,7 @@ mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 
 
 
-```R
+```{r, eval=FALSE}
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
