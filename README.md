@@ -19,7 +19,7 @@ To ensure a consistene and reproducible environement for the analysis, it is rec
 
 Creating a Docker means buildng what is called a Docker image. This is formed by various layers, each representing a step in the installation process. The instructions for building the image are written in a file called `Dockerfile`. This text file contains a series of commands that specify the base image, install necessary packages, and set up the environment. The Dockerfile is used to create a Docker image, which can then be run as a container. The container is an isolated environment that contains all the necessary software and dependencies for the analysis. Everythign that happens inside the coontainer will remain inside the single instance and will not affect the imgage from which it was created, unlsess you explicitly save - commit - the changes to a new image.
 
-## The basis - WORK IN PROGRESS
+## The basis
 
 Before starting to use docker it is necessary to install it on your system. Docker is available for Windows, macOS, and Linux. The installation process varies slightly depending on the operating system:
 
@@ -29,7 +29,7 @@ Before starting to use docker it is necessary to install it on your system. Dock
 
 - On Linux, Docker is installed as a command-line tool. It allows you to run containers and manage images directly from the terminal. The command-line interface provides powerful commands to build, run, and manage Docker containers. To install Docker on Linux, you can follow the instructions on the [Docker website](https://docs.docker.com/engine/install/).
 
-### The Dockerfile - WORK IN PROGRESS
+### The Dockerfile
 
 The Dockerfile is the blueprint for building the Docker image. It contains a series of commands that specify how to set up the environment, install necessary software, and configure the container. Below is an example of a Dockerfile that sets up an environment for scRNAseq analysis using R and Seurat.
 
@@ -43,14 +43,6 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive 
 ```
 
- - WORK IN PROGRESS: add the lines for the user autorizations (on telegram)
-
-```dockerfile
-RUN useradd -u 1000 -m -s /bin/bash nuvobea
-USER nuvobea
-WORKDIR /home/nuvobea
-```
-
 The base Ubuntu image is preatty bare, it does not contain any additional software or packages, just the operating system. To make it suitable for our tasks and for the installation of our required software, we need to install various packages. These packages include essential tools and libraries that are required for running R, Seurat, and Jupyter Lab. The following command installs a set of packages that are commonly used in data analysis and scientific computing.
 
 ```dockerfile
@@ -61,6 +53,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libfribidi-dev make cmake gfortran libxt-dev liblapack-dev libblas-dev \
     sudo wget zlib1g-dev libbz2-dev liblzma-dev libncurses5-dev pandoc git && \
     rm -rf /var/lib/apt/lists/* # Clean up apt cache
+```
+
+We want to set the user as a non-root user to avoid permission issues when running R and JupyterLab. This is a good practice to enhance security and avoid potential conflicts with file permissions. The following commands create a new user with the username `containeruser`, set the home directory, and switch to that user.
+
+```dockerfile
+ARG USERNAME=containeruser
+
+RUN useradd -u 1000 -m -s /bin/bash $USERNAME
+USER $USERNAME
+WORKDIR /home/$USERNAME
 ```
 
 Now we can install R, which is the programming language used for data analysis and visualization. The following commands add the CRAN GPG key and repository for R, update the package list, and install R. This ensures that we have the latest version of R installed in our Docker image.
@@ -455,7 +457,35 @@ markers <- FindAllMarkers(
 
 ## Cell type annotation - WORK IN PROGRESS
 
+### EnrichR - WORK IN PROGRESS
 
+```R
+# mmmmmm
+mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```
+
+### SingleR - WORK IN PROGRESS
+
+```R
+# mmmmmm
+mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```
+
+### GSEA - WORK IN PROGRESS
+
+```R
+# mmmmmm
+mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```
+
+### GSVA - WORK IN PROGRESS
+
+```R
+# mmmmmm
+mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```
+
+### GPTCellType - WORK IN PROGRESS
 
 ```R
 # mmmmmm
