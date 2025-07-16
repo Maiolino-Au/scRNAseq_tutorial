@@ -1,1 +1,375 @@
-# scRNAseq_tutorial
+# Introduction - WORK IN PROGRESS
+
+This tutorial is designed to guide you through the process of analyzing single-cell RNA sequencing (scRNAseq) data using the Seurat package in R. The tutorial will cover the following topics:
+
+- Setting up the working environment as a Docker container
+
+- Downloading and loading the data from the GEO database
+
+- Preprocessing the data, including allignment, normalization, scaling, dimensionality reduction, clustering, cell type annotation
+
+- Performing analysis on the processed data, including differential expression analysis and visualization
+
+All matherials and code for this tutorial are available on [GitHub](https://github.com/Maiolino-Au/scRNAseq_tutorial)
+
+\newpage
+
+# The working Environment - Docker - WORK IN PROGRESS
+To ensure a consistene and reproducible environement for the analysis, it is reccomended to use a Docker container. Docker allows to create a virtual environemnt that contains all the necessary software and dependencies for the analysis. This way, you can avoid issues related to different versions of R, Seurat, and other packages. With proper version control, you can ensure that the analysis will run smoothly and produce consistent results, even years after the initial analysis.
+
+Creating a Docker means buildng what is called a Docker image. This is formed by various layers, each representing a step in the installation process. The instructions for building the image are written in a file called `Dockerfile`. This text file contains a series of commands that specify the base image, install necessary packages, and set up the environment. The Dockerfile is used to create a Docker image, which can then be run as a container. The container is an isolated environment that contains all the necessary software and dependencies for the analysis. Everythign that happens inside the coontainer will remain inside the single instance and will not affect the imgage from which it was created, unlsess you explicitly save - commit - the changes to a new image.
+
+## The basis - WORK IN PROGRESS
+
+Before starting to use docker it is necessary to install it on your system. Docker is available for Windows, macOS, and Linux. The installation process varies slightly depending on the operating system:
+
+- On windows, Docker is installed as a desktop application. It allows you to run containers on your local machine. The Docker Desktop application provides a user interface to manage your containers and images, making it easier to work with Docker. Docker Desktop can be downloaded from the [Docker website](https://www.docker.com/products/docker-desktop/).
+
+- On macOS, Docker is also installed as a desktop application. It provides a similar user interface as on Windows, allowing you to manage your containers and images. Docker Desktop for Mac can be downloaded from the [Docker website](https://www.docker.com/products/docker-desktop/).
+
+- On Linux, Docker is installed as a command-line tool. It allows you to run containers and manage images directly from the terminal. The command-line interface provides powerful commands to build, run, and manage Docker containers. To install Docker on Linux, you can follow the instructions on the [Docker website](https://docs.docker.com/engine/install/).
+
+### The Dockerfile - WORK IN PROGRESS
+
+The Dockerfile is the blueprint for building the Docker image. It contains a series of commands that specify how to set up the environment, install necessary software, and configure the container. Below is an example of a Dockerfile that sets up an environment for scRNAseq analysis using R and Seurat.
+
+Every docker image is built on top of a base image, this is the foundation on wich the other layer of the image are built. The base image can contain just the operating system or it can contain additional software and dependencies. In this case, we will use an Ubuntu base image, which is a popular choice for many Docker images due to its stability and wide range of available packages. 
+
+You can specify which version of Ubuntu you want to use, in this case we will use the 20.04 version, which is a long-term support (LTS) release. This means that it will receive updates and support for an extended period, making it a reliable choice for building Docker images. If you do not specify a version, Docker will use the latest version available, which may not be compatible with all packages and dependencies.
+
+```dockerfile
+FROM ubuntu:20.04
+# Set environment variables to avoid interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive 
+```
+
+The base Ubuntu image is preatty bare, it does not contain any additional software or packages, just the operating system. To make it suitable for our tasks and for the installation of our required software, we need to install various packages. These packages include essential tools and libraries that are required for running R, Seurat, and Jupyter Lab. The following command installs a set of packages that are commonly used in data analysis and scientific computing.
+
+```dockerfile
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    software-properties-common dirmngr gpg curl build-essential \
+    libcurl4-openssl-dev libssl-dev libxml2-dev libfontconfig1-dev \
+    libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev libharfbuzz-dev \
+    libfribidi-dev make cmake gfortran libxt-dev liblapack-dev libblas-dev \
+    sudo wget zlib1g-dev libbz2-dev liblzma-dev libncurses5-dev pandoc git && \
+    rm -rf /var/lib/apt/lists/* # Clean up apt cache
+```
+
+Now we can install R, which is the programming language used for data analysis and visualization. The following commands add the CRAN GPG key and repository for R, update the package list, and install R. This ensures that we have the latest version of R installed in our Docker image.
+
+```dockerfile
+# Add the CRAN GPG key and repository for R
+RUN curl -fsSL https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | gpg --dearmor -o /usr/share/keyrings/cran.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/cran.gpg] https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
+    | tee /etc/apt/sources.list.d/cran-r.list
+# Update again and install R
+RUN apt update && apt install -y --no-install-recommends r-base
+```
+
+At the moment our docker image would have a functional R installation, but it could only be accesed via a terminal. To make it more user-friendly, we can install JupyterLab, which is a web-based interactive development environment for R and Python. JupyterLab allows you to create and share documents that contain live code, equations, visualizations, and narrative text. It is widely used in data science and scientific computing for its flexibility and ease of use.
+
+To install JupyterLab, we first need to install Python and pip, the package manager for Python. We will also create a virtual environment to isolate the JupyterLab installation from the system Python environment. This is a good practice to avoid conflicts between different Python packages and versions.
+
+With the last step we will install the IRkernel package, which allows JupyterLab to run R code. The `IRkernel::installspec(user = FALSE)` command registers the R kernel with JupyterLab, making it available for use in Jupyter notebooks.
+
+```dockerfile
+# Install JupyterLab
+RUN apt update && apt install -y python3 python3-pip python3-venv
+# create a virtual environment in which JupyterLab can be installed
+RUN python3 -m venv /opt/venv
+# Activate virtual environment and install JupyterLab
+RUN /opt/venv/bin/pip install --upgrade pip && /opt/venv/bin/pip install jupyterlab
+# Set the virtual environment as the default Python path
+ENV PATH="/opt/venv/bin:$PATH"
+# Make R visible to jupyter
+RUN R -e "install.packages('IRkernel')" \
+    R -e "IRkernel::installspec(user = FALSE)"
+```
+
+Now we can install the R packages that are required for the analysis. The following command installs the `Seurat` package, which is a popular R package for single-cell RNA sequencing data analysis. It also installs other useful packages such as `dplyr`, `ggplot2`, and `data.table` for data manipulation and visualization.
+
+```dockerfile
+# Install R packages
+RUN R -e "install.packages(c('BiocManager', 'dplyr', 'ggplot2', 'data.table', 'future', 'cowplot', 'remotes', 'R.utils', 'rtracklayer', 'tinytex'))" 
+RUN R -e "BiocManager::install(c('tidyverse', 'Seurat'))" 
+```
+
+We have installed every thing th  - WORK IN PROGRESS
+
+```dockerfile
+ENV SHELL=/bin/bash
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--ServerApp.allow_origin='*'", "--ServerApp.token=''"]
+```
+
+### Building the Docker image
+
+To build the Docker image, you need to create a file named `Dockerfile` in your working directory. This file contains the instructions for building the Docker image. You can use any text editor to create this file.
+
+Then you can build the Docker image using the `docker build` command. This command takes the path to the directory containing the Dockerfile as an argument and builds the image according to the instructions in the Dockerfile.
+
+The following command builds the Docker image and tags it with the name `scrnaseq_tutorial:latest`. The `-t` option specifies the name and tag of the image, and the `.` at the end indicates that the Dockerfile is in the current directory.
+
+```sh
+docker build -t scrnaseq_tutorial:latest .
+```
+
+It will take some time to build the image, as it needs to download and install all the packages and dependencies specified in the Dockerfile. Once the build is complete, you will see a message indicating that the image has been built successfully. Each layer of the image is cached, so if you rebuild the image without changing the Dockerfile, it will be much faster as it will reuse the cached layers.
+
+### Running a Docker container
+
+Now that the image has been built, you can run a Docker container from the it. A container is an instance of the Docker image that runs in an isolated environment. You can run multiple containers from the same image, each with its own isolated environment.
+
+The command to run a Docker container is `docker run`. This command takes several options and arguments to specify how the container should be run. The most common options are:
+
+| Option | Description |
+|--------|-------------|
+| `-it` | Run the container in interactive mode with a terminal |
+| `--rm` | Automatically remove the container when it is stopped |
+| `-p <host_port>:<container_port>` | Map a port on the host machine to a port in the container |
+| `-v <host_dir>:<container_dir>` | Mount a directory from the host machine into the container, you can mount more that one directory by using multiple `-v` options |
+| `--name <container_name>` | Assign a name to the container |
+| `--network <network_name>` | Connect the container to a specific Docker network |
+| `-d` | Run the container in detached mode, meaning it runs in the background and does not block the terminal |
+
+In its simplest form, the command to run a Docker container is:
+
+```sh
+docker run -it ubuntu
+```
+
+This command runs a Docker container from the `ubuntu` image in interactive mode with a terminal. The `-it` option allows you to interact with the container's shell.
+
+To run the container from the image we just built, you can use the following command:
+
+```sh
+docker run -it --rm -p 8888:8888 -v /path/of/working/directory:/sharedFolder scrnaseq_tutorial:latest
+```
+
+This command runs a Docker container from the `scrnaseq_tutorial:latest` image in interactive mode with a terminal. It maps port 8888 on the host machine to port 8888 in the container, allowing you to access JupyterLab from your web browser by goint to `http://localhost:8888`. It also mounts the `/path/of/working/directory` directory from the host machine into the `/sharedFolder` directory in the container, allowing you to access files from your working directory inside the container.
+
+### Saving changes to an image - WORK IN PROGRESS
+
+If you download additional packages or make changes to the container, they will not be saved in the original image. To save the changes, you need to commit the container to a new image. This is done with the `docker commit` command. This command creates a new image from the changes made in the running container. It requires two arguments:
+
+- `<container_id>`: The ID of the running container you want to commit.
+- `<new_image_name>`: The name you want to give to the new image.
+
+To see the ID of the running container, you can use the `docker ps` command, which lists all running containers along with their IDs.
+
+```sh
+docker ps
+-> CONTAINER ID   IMAGE     COMMAND       CREATED          STATUS          PORTS     NAMES
+-> a96481d90563   ubuntu    "/bin/bash"   55 seconds ago   Up 55 seconds             angry_shockley
+docker commit a96481d90563 ubuntu:latest # This will create a new image with the name "ubuntu" and the tag "latest"
+-> sha256:ed0d615f33cd2198cfd21d16ca8d79435b0e7fbe3c233c2aad07fb60cabd4b0b
+```
+
+You can commit the container to a new image with a specific name and tag. The tag is optional but recommended for versioning.
+
+### Usefull Docker commands
+
+This is a list of some useful Docker commands that can help you manage your Docker images and containers:
+
+| Command | Description |
+|---------|-------------|
+| `docker images` | List all Docker images |
+| `docker ps -a` | List all Docker containers, including stopped ones |
+| `docker rmi <image_id>` | Remove a specific Docker image |
+| `docker rm <container_id>` | Remove a specific Docker container |
+| `docker container prune` | Remove all stopped Docker containers |
+| `docker image prune` | Remove all unused Docker images |
+| `docker volume prune` | Remove all unused Docker volumes |
+| `docker network prune` | Remove all unused Docker networks |
+| `docker exec -it <container_id> /bin/bash` | Access a running Docker container's shell |
+| `docker stop <container_id>` | Stop a running Docker container |
+| `docker restart <container_id>` | Restart a stopped Docker container |
+| `docker system prune -a` | Remove all stopped containers, unused images, and unused networks |
+
+## Prebuilt Docker image - WORK IN PROGRESS
+
+Many prebuilt Docker images are available on the Docker Hub repository, which can be used as a base for your own Dockerfile or run directly. This can save time and effort in setting up the environment, as these images often come with the necessary software and dependencies already installed.
+
+If you try to run a container from an image that is not present on your system, Docker will automatically download it from the Docker Hub repository. 
+
+This is mine - WORK IN PROGRESS
+
+```sh
+docker pull ghcr.io/maiolino-au/scrnaseq_tutorial:latest
+```
+
+This image is build by the Satija Lab, the developers of Seurat, and is available on Docker Hub. It contains the latest version of Seurat and all its dependencies. It runs on a terminal and does not contain JupyterLab, but it is possible to install it inside the container or to use this image as a base for your own Dockerfile.
+
+```sh
+docker pull satijalab/seurat:5.0.0
+```
+
+## Credo - a better and faster way to build Docker images - WORK IN PROGRESS
+
+
+
+\newpage
+
+# Obtaining the data - WORK IN PROGRESS
+
+
+
+## your data - WORK IN PROGRESS
+
+
+
+## Downloading the data from GEO - WORK IN PROGRESS
+The Gene Expression Omnibus (GEO) is a public database that stores high-throughput gene expression data, including single-cell RNA sequencing datasets. In this tutorial, we will use a dataset from GEO to demonstrate the analysis of scRNAseq data using the Seurat package in R.
+The data can be downladed manually from the GEO site or with R.
+
+### Manual download - WORK IN PROGRESS
+
+### Download with R - WORK IN PROGRESS
+The GEO database 
+Expecially when working with multiple datasets it is faster to download the data directly from R. The dataset used in this tutorial is GSE150728, which contains scRNAseq data from human peripheral blood mononuclear cells (PBMCs) infected with SARS-CoV-2.
+
+To dowload with R, you will need to install the `curl` and `R.utils` packages if they are not already installed.
+
+```{r, eval=FALSE}
+# Load required packages
+if (!requireNamespace("curl", quietly = TRUE)) install.packages("curl")
+if (!requireNamespace("R.utils", quietly = TRUE)) install.packages("R.utils")
+
+library(curl)
+library(R.utils)
+```
+
+
+```{r, eval=FALSE}
+# URL and destination
+ftp_tar <- "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE150nnn/GSE150728/suppl/GSE150728_RAW.tar"
+dest_dir <- "/sharedFolder/Data"
+tar_file <- file.path(dest_dir, "GSE150728_RAW.tar")
+
+# Ensure directory exists
+dir.create(dest_dir, showWarnings = FALSE)
+
+# Download using curl with extended timeout
+curl::curl_download(url = ftp_tar, destfile = tar_file, mode = "wb", handle = new_handle(timeout = 300))
+
+# Extract the .tar archive
+untar(tar_file, exdir = dest_dir)
+
+# Unzip all .rds.gz files
+gz_files <- list.files(dest_dir, pattern = "\\.gz$", full.names = TRUE)
+for (f in gz_files) {
+    message("Unzipping: ", f)
+    gunzip(f, overwrite = TRUE, remove = TRUE)
+}
+
+# Optional cleanup
+unlink(tar_file)
+```
+
+\newpage
+
+## Load the data in R - WORK IN PROGRESS
+
+
+
+```{r, eval=FALSE}
+# mmmmmm
+mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```
+
+\newpage
+
+# Processing - WORK IN PROGRESS
+
+
+
+## Reads allignment - WORK IN PROGRESS
+
+
+
+```{r, eval=FALSE}
+# mmmmmm
+mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```
+
+## Normalization - WORK IN PROGRESS
+
+
+
+```{r, eval=FALSE}
+# mmmmmm
+mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```
+
+## Scaling - WORK IN PROGRESS
+
+
+
+```{r, eval=FALSE}
+# mmmmmm
+mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```
+
+## Dimensionality Reduction - WORK IN PROGRESS
+
+
+
+```{r, eval=FALSE}
+# mmmmmm
+mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```
+
+## Clustering - WORK IN PROGRESS
+
+
+
+```{r, eval=FALSE}
+# mmmmmm
+mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```
+
+## Finding the most expressed markers - WORK IN PROGRESS
+
+
+
+```{r, eval=FALSE}
+# mmmmmm
+mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```
+
+## Cell type annotation - WORK IN PROGRESS
+
+
+
+```{r, eval=FALSE}
+# mmmmmm
+mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```
+
+\newpage
+
+# Analysis - WORK IN PROGRESS
+
+
+
+```{r, eval=FALSE}
+# mmmmmm
+mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```
+
+## Differential Expression Analysis - WORK IN PROGRESS
+
+
+
+```{r, eval=FALSE}
+# mmmmmm
+mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```
+
+## Visualization - WORK IN PROGRESS
+
+
+
+```{r, eval=FALSE}
+# mmmmmm
+mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
+```
