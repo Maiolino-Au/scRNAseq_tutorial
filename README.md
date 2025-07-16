@@ -94,9 +94,12 @@ RUN R -e "install.packages(c('BiocManager', 'dplyr', 'ggplot2', 'data.table', 'f
 RUN R -e "BiocManager::install(c('tidyverse', 'Seurat'))" 
 ```
 
-We have installed every thing th  - WORK IN PROGRESS
+The last line in a Dockerfile is the command that will be executed when the container is started. 
+
+In this case, we are setting the default shell to `/bin/bash` and starting JupyterLab with specific options. We are starting JupyterLab on port 8888, allowing access from any IP address without ne necessity of a token. This allows you to access JupyterLab from your web browser by going to `http://localhost:8888`. The `--allow-root` option allows JupyterLab to run as the root user, which is necessary when running inside a Docker container.
 
 ```dockerfile
+# Set /bin/bash as the default shell
 ENV SHELL=/bin/bash
 CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--ServerApp.allow_origin='*'", "--ServerApp.token=''"]
 ```
@@ -147,7 +150,7 @@ docker run -it --rm -p 8888:8888 -v /path/of/working/directory:/sharedFolder scr
 
 This command runs a Docker container from the `scrnaseq_tutorial:latest` image in interactive mode with a terminal. It maps port 8888 on the host machine to port 8888 in the container, allowing you to access JupyterLab from your web browser by goint to `http://localhost:8888`. It also mounts the `/path/of/working/directory` directory from the host machine into the `/sharedFolder` directory in the container, allowing you to access files from your working directory inside the container.
 
-### Saving changes to an image - WORK IN PROGRESS
+### Saving changes to an image
 
 If you download additional packages or make changes to the container, they will not be saved in the original image. To save the changes, you need to commit the container to a new image. This is done with the `docker commit` command. This command creates a new image from the changes made in the running container. It requires two arguments:
 
@@ -160,7 +163,7 @@ To see the ID of the running container, you can use the `docker ps` command, whi
 docker ps
 -> CONTAINER ID   IMAGE     COMMAND       CREATED          STATUS          PORTS     NAMES
 -> a96481d90563   ubuntu    "/bin/bash"   55 seconds ago   Up 55 seconds             angry_shockley
-docker commit a96481d90563 ubuntu:latest # This will create a new image with the name "ubuntu" and the tag "latest"
+docker commit a96481d90563 ubuntu:latest 
 -> sha256:ed0d615f33cd2198cfd21d16ca8d79435b0e7fbe3c233c2aad07fb60cabd4b0b
 ```
 
@@ -185,19 +188,19 @@ This is a list of some useful Docker commands that can help you manage your Dock
 | `docker restart <container_id>` | Restart a stopped Docker container |
 | `docker system prune -a` | Remove all stopped containers, unused images, and unused networks |
 
-## Prebuilt Docker image - WORK IN PROGRESS
+## Prebuilt Docker image
 
 Many prebuilt Docker images are available on the Docker Hub repository, which can be used as a base for your own Dockerfile or run directly. This can save time and effort in setting up the environment, as these images often come with the necessary software and dependencies already installed.
 
-If you try to run a container from an image that is not present on your system, Docker will automatically download it from the Docker Hub repository. 
+If you try to run a container from an image that is not present on your system, Docker will automatically download it from the Docker Hub repository. You can also pull a specific image from the repository using the `docker pull` command.
 
-This is mine - WORK IN PROGRESS
+The image build from the Dockerfile above is available on GitHub Container Registry, and can be pulled with the following command:
 
 ```sh
 docker pull ghcr.io/maiolino-au/scrnaseq_tutorial:latest
 ```
 
-This image is build by the Satija Lab, the developers of Seurat, and is available on Docker Hub. It contains the latest version of Seurat and all its dependencies. It runs on a terminal and does not contain JupyterLab, but it is possible to install it inside the container or to use this image as a base for your own Dockerfile.
+You can find various prebuilt images, one that might be usefull is the `satijalab/seurat` image, build by the Satija Lab, the developers of Seurat, and is available on [Docker Hub](https://hub.docker.com/r/satijalab/seurat). It contains the latest version of Seurat and all its dependencies. It runs on a terminal and does not contain JupyterLab, but it is possible to install it inside the container or to use this image as a base for your own Dockerfile. There is one available for each version of Seurat, so you can choose the one that best fits your needs. The following command pulls the Seurat 5.0.0 image from Docker Hub:
 
 ```sh
 docker pull satijalab/seurat:5.0.0
@@ -267,6 +270,10 @@ unlink(tar_file)
 
 \newpage
 
+# Processing - WORK IN PROGRESS
+
+
+
 ## Load the data in R - WORK IN PROGRESS
 
 
@@ -275,12 +282,6 @@ unlink(tar_file)
 # mmmmmm
 mmmm <- data.frame("m", "m", "m", "m", "m", "m", "m", "m", "m", "m")
 ```
-
-\newpage
-
-# Processing - WORK IN PROGRESS
-
-
 
 ## Reads allignment - WORK IN PROGRESS
 
