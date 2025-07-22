@@ -1,3 +1,28 @@
+# Single Cell RNA Sequencing (scRNAseq) with Seurat
+
+Maiolino Aurelio - July 2025
+
+# Index
+
+0. [Introduction](#introduction---work-in-progress)
+1. [Docker: the Working Environment](#docker-the-working-environment)
+    1. [The basis](#the-basis)
+        1. [The Dockerfile](#the-dockerfile)
+        2. [Building the Docker image](#building-the-docker-image)
+        3. [Running a Docker container](#running-a-docker-container)
+        4. [Saving changes to an image](#saving-changes-to-an-image)
+        5. [Usefull Docker commands](#usefull-docker-commands)
+    2. [Prebuilt Docker images](#prebuilt-docker-images)
+    3. [Credo: a better and faster way to build Docker images](#credo-a-better-and-faster-way-to-build-docker-images)
+2. [The basis](#the-basis)
+    1. [The basis](#the-basis)
+3. [The basis](#the-basis)
+    1. [The basis](#the-basis)
+4. [The basis](#the-basis)
+    1. [The basis](#the-basis)
+5. [The basis](#the-basis)
+    1. [The basis](#the-basis)
+ 
 # Introduction - WORK IN PROGRESS
 
 This tutorial is designed to guide you through the process of analyzing single-cell RNA sequencing (scRNAseq) data using the Seurat package in R. The tutorial will cover the following topics:
@@ -202,7 +227,7 @@ This is a list of some useful Docker commands that can help you manage your Dock
 | `docker network prune` | Remove all unused Docker networks |
 | `docker system prune -a` | Remove all stopped containers, unused images, and unused networks |
 
-## Prebuilt Docker image
+## Prebuilt Docker images
 
 Many prebuilt Docker images are available on the Docker Hub repository, which can be used as a base for your own Dockerfile or run directly. This can save time and effort in setting up the environment, as these images often come with the necessary software and dependencies already installed.
 
@@ -222,7 +247,7 @@ The following command pulls the Seurat 5.0.0 image from Docker Hub:
 docker pull satijalab/seurat:5.0.0
 ```
 
-## Credo: a better and faster way to build Docker images - WORK IN PROGRESS
+## Credo: a better and faster way to build Docker images
 
 [Credo](https://github.com/CREDOProject/core?tab=readme-ov-file) allows to build Docker images with specific versions of software, packages, and dependencies in a seemless and efficient way. 
 
