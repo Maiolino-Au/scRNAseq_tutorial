@@ -14,7 +14,7 @@ All matherials and code for this tutorial are available on [GitHub](https://gith
 
 
 
-# The working Environment - Docker - WORK IN PROGRESS
+# Docker: the Working Environment
 To ensure a consistene and reproducible environement for the analysis, it is reccomended to use a Docker container. Docker allows to create a virtual environemnt that contains all the necessary software and dependencies for the analysis. This way, you can avoid issues related to different versions of R, Seurat, and other packages. With proper version control, you can ensure that the analysis will run smoothly and produce consistent results, even years after the initial analysis.
 
 Creating a Docker means buildng what is called a Docker image. This is formed by various layers, each representing a step in the installation process. The instructions for building the image are written in a file called `Dockerfile`. This text file contains a series of commands that specify the base image, install necessary packages, and set up the environment. The Dockerfile is used to create a Docker image, which can then be run as a container. The container is an isolated environment that contains all the necessary software and dependencies for the analysis. Everythign that happens inside the coontainer will remain inside the single instance and will not affect the imgage from which it was created, unlsess you explicitly save - commit - the changes to a new image.
@@ -54,6 +54,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     sudo wget zlib1g-dev libbz2-dev liblzma-dev libncurses5-dev pandoc git && \
     rm -rf /var/lib/apt/lists/* # Clean up apt cache
 ```
+
+PROBPLEM - WORK IN PROGRESS
+
+- still not implemented correctly in the Dockerfile, v0.0.1 does not have it and works
 
 We want to set the user as a non-root user to avoid permission issues when running R and JupyterLab. This is a good practice to enhance security and avoid potential conflicts with file permissions. The following commands create a new user with the username `containeruser`, set the home directory, and switch to that user.
 
@@ -187,15 +191,15 @@ This is a list of some useful Docker commands that can help you manage your Dock
 |---------|-------------|
 | `docker images` | List all Docker images |
 | `docker ps -a` | List all Docker containers, including stopped ones |
-| `docker rmi <image_id>` | Remove a specific Docker image |
+| `docker exec -it <container_id> /bin/bash` | Access a running Docker container's shell |
+| `docker stop <container_id>` | Stop a running Docker container |
+| `docker restart <container_id>` | Restart a stopped Docker container |
 | `docker rm <container_id>` | Remove a specific Docker container |
+| `docker rmi <image_id>` | Remove a specific Docker image |
 | `docker container prune` | Remove all stopped Docker containers |
 | `docker image prune` | Remove all unused Docker images |
 | `docker volume prune` | Remove all unused Docker volumes |
 | `docker network prune` | Remove all unused Docker networks |
-| `docker exec -it <container_id> /bin/bash` | Access a running Docker container's shell |
-| `docker stop <container_id>` | Stop a running Docker container |
-| `docker restart <container_id>` | Restart a stopped Docker container |
 | `docker system prune -a` | Remove all stopped containers, unused images, and unused networks |
 
 ## Prebuilt Docker image
@@ -210,7 +214,9 @@ The image build from the Dockerfile above is available on GitHub Container Regis
 docker pull ghcr.io/maiolino-au/scrnaseq_tutorial:latest
 ```
 
-You can find various prebuilt images, one that might be usefull is the `satijalab/seurat` image, build by the Satija Lab, the developers of Seurat, and is available on [Docker Hub](https://hub.docker.com/r/satijalab/seurat). It contains the latest version of Seurat and all its dependencies. It runs on a terminal and does not contain JupyterLab, but it is possible to install it inside the container or to use this image as a base for your own Dockerfile. There is one available for each version of Seurat, so you can choose the one that best fits your needs. The following command pulls the Seurat 5.0.0 image from Docker Hub:
+You can find various prebuilt images, one that might be usefull is the `satijalab/seurat` image, build by the Satija Lab, the developers of Seurat, and is available on [Docker Hub](https://hub.docker.com/r/satijalab/seurat). It contains the latest version of Seurat and all its dependencies. It runs on a terminal and does not contain JupyterLab, but it is possible to install it inside the container or to use this image as a base for your own Dockerfile. There is one available for each version of Seurat, so you can choose the one that best fits your needs. 
+
+The following command pulls the Seurat 5.0.0 image from Docker Hub:
 
 ```sh
 docker pull satijalab/seurat:5.0.0
@@ -218,15 +224,44 @@ docker pull satijalab/seurat:5.0.0
 
 ## Credo: a better and faster way to build Docker images - WORK IN PROGRESS
 
+[Credo](https://github.com/CREDOProject/core?tab=readme-ov-file) allows to build Docker images with specific versions of software, packages, and dependencies in a seemless and efficient way. 
+
+We will use it for this project, but at the moment it is still in development and not all features are implemented. You do not have to build your Dockers with the exact versions specified in the papers, we will do it later with credo when it is ready.
+
+
+
+# Singel Cell RNA Sequencing (scRNAseq) - WORK IN PROGRESS
+
+what it is
+
+## the data
+
+Reads
+
+allignemnt
+
+## Dimensional reduction - WORK IN PROGRESS
+
+### Linear methods - PCA - WORK IN PROGRESS
+
+### Non-linear methods - UMAP, tSNE - WORK IN PROGRESS
+
+## Clustering - WORK IN PROGRESS
+
+## Cluster markers - WORK IN PROGRESS
+
+## Pseudo Bulk - WORK IN PROGRESS
+
+## Trajectory Inference - WORK IN PROGRESS
+
+### Monocle - WORK IN PROGRESS
+
+### RNA velocity - WORK IN PROGRESS
 
 
 
 
 # Obtaining the data - WORK IN PROGRESS
-
-
-
-## your data - WORK IN PROGRESS
 
 
 
@@ -253,8 +288,19 @@ library(R.utils)
 
 
 ```R
+args <- commandArgs(trailingOnly = TRUE)
+if (length(args) < 1) {
+    stop("Provide a GEO id (ex. GSE150728)")
+}
+GEO_id <- args[1]
+
 # URL and destination
-ftp_tar <- "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE150nnn/GSE150728/suppl/GSE150728_RAW.tar"
+ftp_tar <- paste0(
+    "https://ftp.ncbi.nlm.nih.gov/geo/series/",
+    gsub(".{3}$", "", GEO_id), "nnn/",
+    GEO_id, "/suppl/",
+    GEO_id, "_RAW.tar"
+)
 dest_dir <- "/sharedFolder/Data"
 tar_file <- file.path(dest_dir, "GSE150728_RAW.tar")
 
@@ -286,7 +332,15 @@ unlink(tar_file)
 
 ## Load the data in R - WORK IN PROGRESS
 
+The first step in the analysis of datas it is to load them in your working environment. But first we need to understant how they are structured.
 
+After allignemnt, scRNA-seq data is typically stored in a sparse matrix. A full matrix is a table, with row and columns, in which every value is stored. This is not efficient for scRNA-seq data, as most of the value in the matrix will be zero (the majority of the genes are not expresset in a given cell). A sparse matrix is a data structure that only stores non zero values, greatly reducing the memory usage. A sparse matrix is divided in three files:
+
+- `matrix.mtx.gz`: the sparse matrix in Matrix Market format, which contains the non-zero values of the matrix, along with their row and column indices.
+- `features.tsv.gz`: a tab-separated file that contains the gene names and their corresponding indices in the sparse matrix. This file is used to map the gene names to their indices in the matrix.
+- `barcodes.tsv.gz`: a tab-separated file that contains the cell barcodes and their corresponding indices in the sparse matrix. This file is used to map the cell barcodes to their indices in the matrix.
+
+We therefore have two files with the names of rows and columns, and one with the value of the matrix and their coordinates. We can reassemble the sparse matrix in R.
 
 ### Load the spares matrix separately - WORK IN PROGRESS
 
@@ -301,16 +355,18 @@ genes <- readLines("/sharedFolder/Data/features.tsv.gz")
 barcodes <- readLines("/sharedFolder/Data/barcodes.tsv.gz")
 ```
 
-### Load via 10X - WORK IN PROGRESS
+### Load via Read10X - WORK IN PROGRESS
 
+The `Read10X` function from the Seurat package can be used to read the sparse matrix and the metadata files in one go. This function is specifically designed to read 10X Genomics data, which is the format used for scRNA-seq data.
 
 ```R
 raw_data <- Read10X(
-    data.dir = "/sharedFolder/Data/directory",
+    data.dir = "/sharedFolder/Data",
     gene.column = 1
 )
 ```
 
+Seurat obj
 
 ```R
 sc_data <- CreateSeuratObject(
@@ -323,7 +379,7 @@ sc_data <- CreateSeuratObject(
 )
 ```
 
-## Reads allignment - WORK IN PROGRESS
+## Reads allignment - WORK IN PROGRESS - to move
 
 
 
