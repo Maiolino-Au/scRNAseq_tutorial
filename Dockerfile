@@ -15,12 +15,6 @@ RUN curl -fsSL https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc 
     && echo "deb [signed-by=/usr/share/keyrings/cran.gpg] https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
     | tee /etc/apt/sources.list.d/cran-r.list
 
-# Set the user as a non-root to avoid permission issues
-ARG USERNAME=containeruser
-RUN useradd -u 1000 -m -s /bin/bash $USERNAME
-USER $USERNAME
-WORKDIR /home/$USERNAME
-
 # Update again and install R
 RUN sudo apt update && sudo apt install -y --no-install-recommends r-base
 
@@ -39,6 +33,12 @@ RUN R -e "install.packages('IRkernel')" && \
 # Install R packages
 RUN R -e "install.packages(c('BiocManager', 'dplyr', 'ggplot2', 'data.table', 'future', 'cowplot', 'remotes', 'R.utils', 'rtracklayer', 'tinytex'))" 
 RUN R -e "BiocManager::install(c('tidyverse', 'Seurat'))" 
+
+# Set the user as a non-root to avoid permission issues
+ARG USERNAME=containeruser
+RUN useradd -u 1000 -m -s /bin/bash $USERNAME
+USER $USERNAME
+WORKDIR /home/$USERNAME
 
 ENV SHELL=/bin/bash
 CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--ServerApp.allow_origin='*'", "--ServerApp.token=''"]
