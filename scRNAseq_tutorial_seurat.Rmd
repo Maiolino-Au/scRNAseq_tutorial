@@ -214,15 +214,15 @@ This is a list of some useful Docker commands that can help you manage your Dock
 |---------|-------------|
 | `docker images` | List all Docker images |
 | `docker ps -a` | List all Docker containers, including stopped ones |
-| `docker rmi <image_id>` | Remove a specific Docker image |
+| `docker exec -it <container_id> /bin/bash` | Access a running Docker container's shell |
+| `docker stop <container_id>` | Stop a running Docker container |
+| `docker restart <container_id>` | Restart a stopped Docker container |
 | `docker rm <container_id>` | Remove a specific Docker container |
+| `docker rmi <image_id>` | Remove a specific Docker image |
 | `docker container prune` | Remove all stopped Docker containers |
 | `docker image prune` | Remove all unused Docker images |
 | `docker volume prune` | Remove all unused Docker volumes |
 | `docker network prune` | Remove all unused Docker networks |
-| `docker exec -it <container_id> /bin/bash` | Access a running Docker container's shell |
-| `docker stop <container_id>` | Stop a running Docker container |
-| `docker restart <container_id>` | Restart a stopped Docker container |
 | `docker system prune -a` | Remove all stopped containers, unused images, and unused networks |
 
 ## Prebuilt Docker image
@@ -253,11 +253,38 @@ We will use it for this project, but at the moment it is still in development an
 
 \newpage
 
+# Singel Cell RNA Sequencing (scRNAseq) - WORK IN PROGRESS
+
+what it is
+
+## the data
+
+Reads
+
+allignemnt
+
+## Dimensional reduction - WORK IN PROGRESS
+
+### Linear methods - PCA - WORK IN PROGRESS
+
+### Non-linear methods - UMAP, tSNE - WORK IN PROGRESS
+
+## Clustering - WORK IN PROGRESS
+
+## Cluster markers - WORK IN PROGRESS
+
+## Pseudo Bulk - WORK IN PROGRESS
+
+## Trajectory Inference - WORK IN PROGRESS
+
+### Monocle - WORK IN PROGRESS
+
+### RNA velocity - WORK IN PROGRESS
+
+
+\newpage
+
 # Obtaining the data - WORK IN PROGRESS
-
-
-
-## your data - WORK IN PROGRESS
 
 
 
