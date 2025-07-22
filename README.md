@@ -80,20 +80,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/* # Clean up apt cache
 ```
 
-PROBPLEM - WORK IN PROGRESS
-
-- still not implemented correctly in the Dockerfile, v0.0.1 does not have it and works
-
-We want to set the user as a non-root user to avoid permission issues when running R and JupyterLab. This is a good practice to enhance security and avoid potential conflicts with file permissions. The following commands create a new user with the username `containeruser`, set the home directory, and switch to that user.
-
-```dockerfile
-ARG USERNAME=containeruser
-
-RUN useradd -u 1000 -m -s /bin/bash $USERNAME
-USER $USERNAME
-WORKDIR /home/$USERNAME
-```
-
 Now we can install R, which is the programming language used for data analysis and visualization. The following commands add the CRAN GPG key and repository for R, update the package list, and install R. This ensures that we have the latest version of R installed in our Docker image.
 
 ```dockerfile
@@ -131,6 +117,16 @@ Now we can install the R packages that are required for the analysis. The follow
 # Install R packages
 RUN R -e "install.packages(c('BiocManager', 'dplyr', 'ggplot2', 'data.table', 'future', 'cowplot', 'remotes', 'R.utils', 'rtracklayer', 'tinytex'))" 
 RUN R -e "BiocManager::install(c('tidyverse', 'Seurat'))" 
+```
+
+We want to set the user as a non-root user to avoid permission issues when running R and JupyterLab. This is a good practice to enhance security and avoid potential conflicts with file permissions. The following commands create a new user with the username `containeruser`, set the home directory, and switch to that user.
+
+```dockerfile
+ARG USERNAME=containeruser
+
+RUN useradd -u 1000 -m -s /bin/bash $USERNAME
+USER $USERNAME
+WORKDIR /home/$USERNAME
 ```
 
 The last line in a Dockerfile is the command that will be executed when the container is started. 
