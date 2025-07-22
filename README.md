@@ -43,7 +43,7 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive 
 ```
 
-The base Ubuntu image is preatty bare, it does not contain any additional software or packages, just the operating system. To make it suitable for our tasks and for the installation of our required software, we need to install various packages. These packages include essential tools and libraries that are required for running R, Seurat, and Jupyter Lab. The following command installs a set of packages that are commonly used in data analysis and scientific computing.
+The base Ubuntu image is pretty bare, it does not contain any additional software or packages, just the operating system. To make it suitable for our tasks and for the installation of our required software, we need to install various packages. These packages include essential tools and libraries that are required for running R, Seurat, and Jupyter Lab. The following command installs a set of packages that are commonly used in data analysis and scientific computing.
 
 ```dockerfile
 RUN apt-get update && apt-get install -y --no-install-recommends \
