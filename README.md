@@ -2,6 +2,8 @@
 
 Maiolino Aurelio - July 2025
 
+This is still a work in progress
+
 # Index
 
 0. [Introduction](#introduction---work-in-progress)
