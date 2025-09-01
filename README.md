@@ -143,7 +143,7 @@ CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-r
 
 ### Building the Docker image
 
-To build the Docker image, you need to create a file named `Dockerfile` in your working directory. This file contains the instructions for building the Docker image. You can use any text editor to create this file.
+To build the Docker image, you need to create a file named `Dockerfile` (without file extension) in your working directory. This file contains the instructions for building the Docker image. You can use any text editor to create this file.
 
 Then you can build the Docker image using the `docker build` command. This command takes the path to the directory containing the Dockerfile as an argument and builds the image according to the instructions in the Dockerfile.
 
