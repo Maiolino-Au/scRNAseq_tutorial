@@ -1,6 +1,6 @@
 # Single Cell RNA Sequencing (scRNAseq) with Seurat
 
-Maiolino Aurelio - July 2025
+Maiolino Aurelio - September 2025
 
 This is still a work in progress
 
@@ -8,22 +8,17 @@ This is still a work in progress
 
 0. [Introduction](#introduction---work-in-progress)
 1. [Docker: the Working Environment](#docker-the-working-environment)
-    1. [The basis](#the-basis)
+    1. [The basis](#the-basis-how-to-build-and-use-a-docker-image)
         1. [The Dockerfile](#the-dockerfile)
         2. [Building the Docker image](#building-the-docker-image)
         3. [Running a Docker container](#running-a-docker-container)
         4. [Saving changes to an image](#saving-changes-to-an-image)
         5. [Usefull Docker commands](#usefull-docker-commands)
-    2. [Prebuilt Docker images](#prebuilt-docker-images)
-    3. [Credo: a better and faster way to build Docker images](#credo-a-better-and-faster-way-to-build-docker-images)
+    2. [Preexisting Docker images](#preexisting-docker-images)
+    3. [Credo: a better and faster way to build Docker images](#credo-a-better-and-faster-way-to-build-docker-images---work-in-progress)
 2. [The basis](#the-basis)
     1. [The basis](#the-basis)
-3. [The basis](#the-basis)
-    1. [The basis](#the-basis)
-4. [The basis](#the-basis)
-    1. [The basis](#the-basis)
-5. [The basis](#the-basis)
-    1. [The basis](#the-basis)
+
  
 # Introduction - WORK IN PROGRESS
 
@@ -39,14 +34,22 @@ This tutorial is designed to guide you through the process of analyzing single-c
 
 All matherials and code for this tutorial are available on [GitHub](https://github.com/Maiolino-Au/scRNAseq_tutorial)
 
+suggestions:
 
+* expalin seurat, monocle, and other separately for the processing of the data
+* show trajectory inference with monocle and RNA velocity
+* show the various methods for visualization, with ggplot2, Seurat, monocle, ...
+* examples of pipelines
+
+
+\newpage
 
 # Docker: the Working Environment
 To ensure a consistene and reproducible environement for the analysis, it is reccomended to use a Docker container. Docker allows to create a virtual environemnt that contains all the necessary software and dependencies for the analysis. This way, you can avoid issues related to different versions of R, Seurat, and other packages. With proper version control, you can ensure that the analysis will run smoothly and produce consistent results, even years after the initial analysis.
 
-Creating a Docker means buildng what is called a Docker image. This is formed by various layers, each representing a step in the installation process. The instructions for building the image are written in a file called `Dockerfile`. This text file contains a series of commands that specify the base image, install necessary packages, and set up the environment. The Dockerfile is used to create a Docker image, which can then be run as a container. The container is an isolated environment that contains all the necessary software and dependencies for the analysis. Everythign that happens inside the coontainer will remain inside the single instance and will not affect the imgage from which it was created, unlsess you explicitly save - commit - the changes to a new image.
+Creating a Docker means buildng what is called a Docker image. This is formed by various layers, each representing a step in the installation process. The instructions for building the image are written in a file called `Dockerfile` (without any file extension). This text file contains a series of commands that specify the base image, install necessary packages, and set up the environment. The Dockerfile is used to create a Docker image, which can then be run as a container. The container is an isolated environment that contains all the necessary software and dependencies for the analysis. Everythign that happens inside the coontainer will remain inside the single instance and will not affect the imgage from which it was created, unlsess you explicitly save - commit - the changes to a new image.
 
-## The basis
+## The basis: how to build and use a Docker image
 
 Before starting to use docker it is necessary to install it on your system. Docker is available for Windows, macOS, and Linux. The installation process varies slightly depending on the operating system:
 
@@ -121,7 +124,7 @@ RUN R -e "install.packages(c('BiocManager', 'dplyr', 'ggplot2', 'data.table', 'f
 RUN R -e "BiocManager::install(c('tidyverse', 'Seurat'))" 
 ```
 
-We want to set the user as a non-root user to avoid permission issues when running R and JupyterLab. This is a good practice to enhance security and avoid potential conflicts with file permissions. The following commands create a new user with the username `containeruser`, set the home directory, and switch to that user.
+A We want to set the user as a non-root user to avoid permission issues when running R and JupyterLab. This is a good practice to enhance security and avoid potential conflicts with file permissions. The following commands create a new user with the username `containeruser`, set the home directory, and switch to that user. (This part is not necessary and can be skipped, in case you want to run everything as root or in case it couses issues with your docker image)
 
 ```dockerfile
 ARG USERNAME=containeruser
@@ -143,9 +146,7 @@ CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-r
 
 ### Building the Docker image
 
-To build the Docker image, you need to create a file named `Dockerfile` (without file extension) in your working directory. This file contains the instructions for building the Docker image. You can use any text editor to create this file.
-
-Then you can build the Docker image using the `docker build` command. This command takes the path to the directory containing the Dockerfile as an argument and builds the image according to the instructions in the Dockerfile.
+To build the Docker image, you need to create the `Dockerfile` in your working directory. Then you can build the Docker image using the `docker build` command. This command takes the path to the directory containing the Dockerfile as an argument and builds the image according to the instructions in the Dockerfile.
 
 The following command builds the Docker image and tags it with the name `scrnaseq_tutorial:latest`. The `-t` option specifies the name and tag of the image, and the `.` at the end indicates that the Dockerfile is in the current directory.
 
@@ -184,8 +185,25 @@ To run the container from the image we just built, you can use the following com
 ```sh
 docker run -it --rm -p 8888:8888 -v /path/of/working/directory:/sharedFolder scrnaseq_tutorial:latest
 ```
-
 This command runs a Docker container from the `scrnaseq_tutorial:latest` image in interactive mode with a terminal. It maps port 8888 on the host machine to port 8888 in the container, allowing you to access JupyterLab from your web browser by goint to `http://localhost:8888`. It also mounts the `/path/of/working/directory` directory from the host machine into the `/sharedFolder` directory in the container, allowing you to access files from your working directory inside the container.
+
+#### Run your analysis with one command
+You can use docker containers to run your complete analysis. 
+
+For organizational purposes you can mount two directories, one for the data and one for the results, this way you can keep them separate from the working directory. You can do this by using two `-v` options, one for each directory. 
+
+With the `-d` option, you can run this container in detached mode, so that it runs in the background and does not block the terminal. 
+
+By writing the name of a script after the name of the image you will be able to run it when the container is started. This is equivalent to the `CMD` command in the Dockerfile, but it will override it for this specific instance of the container.
+
+(The `\` allows to split the command into multiple lines for better readability)
+
+```sh
+docker run -d --rm -p 8888:8888 \
+    -v /path/of/dir/Data:/Data \
+    -v /path/of/dir/Results:/Results \
+    scrnaseq_tutorial:latest Script.R
+```
 
 ### Saving changes to an image
 
@@ -225,7 +243,7 @@ This is a list of some useful Docker commands that can help you manage your Dock
 | `docker network prune` | Remove all unused Docker networks |
 | `docker system prune -a` | Remove all stopped containers, unused images, and unused networks |
 
-## Prebuilt Docker images
+## Preexisting Docker images
 
 Many prebuilt Docker images are available on the Docker Hub repository, which can be used as a base for your own Dockerfile or run directly. This can save time and effort in setting up the environment, as these images often come with the necessary software and dependencies already installed.
 
@@ -237,7 +255,7 @@ The image build from the Dockerfile above is available on GitHub Container Regis
 docker pull ghcr.io/maiolino-au/scrnaseq_tutorial:latest
 ```
 
-You can find various prebuilt images, one that might be usefull is the `satijalab/seurat` image, build by the Satija Lab, the developers of Seurat, and is available on [Docker Hub](https://hub.docker.com/r/satijalab/seurat). It contains the latest version of Seurat and all its dependencies. It runs on a terminal and does not contain JupyterLab, but it is possible to install it inside the container or to use this image as a base for your own Dockerfile. There is one available for each version of Seurat, so you can choose the one that best fits your needs. 
+Antoher one that might be usefull is the `satijalab/seurat` image, build by the Satija Lab, the developers of Seurat, and is available on [Docker Hub](https://hub.docker.com/r/satijalab/seurat). It contains the latest version of Seurat and all its dependencies. It runs on a terminal and does not contain JupyterLab, but it is possible to install it inside the container or to use this image as a base for your own Dockerfile. There is one available for each version of Seurat, so you can choose the one that best fits your needs. 
 
 The following command pulls the Seurat 5.0.0 image from Docker Hub:
 
@@ -245,7 +263,7 @@ The following command pulls the Seurat 5.0.0 image from Docker Hub:
 docker pull satijalab/seurat:5.0.0
 ```
 
-## Credo: a better and faster way to build Docker images
+## Credo: a better and faster way to build Docker images - WORK IN PROGRESS
 
 [Credo](https://github.com/CREDOProject/core?tab=readme-ov-file) allows to build Docker images with specific versions of software, packages, and dependencies in a seemless and efficient way. 
 
