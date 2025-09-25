@@ -8,7 +8,7 @@ This is still a work in progress
 
 0. [Introduction](#introduction---work-in-progress)
 1. [Docker: the Working Environment](#docker-the-working-environment)
-    1. [The basis](#the-basis-how-to-build-and-use-a-docker-image)
+    1. [The basis: how to build and use a Docker image](#the-basis-how-to-build-and-use-a-docker-image)
         1. [The Dockerfile](#the-dockerfile)
         2. [Building the Docker image](#building-the-docker-image)
         3. [Running a Docker container](#running-a-docker-container)
