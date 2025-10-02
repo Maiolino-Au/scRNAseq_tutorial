@@ -22,24 +22,7 @@ This is still a work in progress
  
 # Introduction - WORK IN PROGRESS
 
-This tutorial is designed to guide you through the process of analyzing single-cell RNA sequencing (scRNAseq) data using the Seurat package in R. The tutorial will cover the following topics:
 
-- Setting up the working environment as a Docker container
-
-- Downloading and loading the data from the GEO database
-
-- Preprocessing the data, including allignment, normalization, scaling, dimensionality reduction, clustering, cell type annotation
-
-- Performing analysis on the processed data, including differential expression analysis and visualization
-
-All matherials and code for this tutorial are available on [GitHub](https://github.com/Maiolino-Au/scRNAseq_tutorial)
-
-suggestions:
-
-* expalin seurat, monocle, and other separately for the processing of the data
-* show trajectory inference with monocle and RNA velocity
-* show the various methods for visualization, with ggplot2, Seurat, monocle, ...
-* examples of pipelines
 
 
 \newpage
