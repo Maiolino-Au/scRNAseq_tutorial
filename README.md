@@ -2,7 +2,7 @@
 
 Maiolino Aurelio - September 2025
 
-This is still a work in progress
+This is still a work in progress 
 
 # Index
 
@@ -24,8 +24,6 @@ This is still a work in progress
 
 
 
-
-\newpage
 
 # Docker: the Working Environment
 To ensure a consistene and reproducible environement for the analysis, it is reccomended to use a Docker container. Docker allows to create a virtual environemnt that contains all the necessary software and dependencies for the analysis. This way, you can avoid issues related to different versions of R, Seurat, and other packages. With proper version control, you can ensure that the analysis will run smoothly and produce consistent results, even years after the initial analysis.
