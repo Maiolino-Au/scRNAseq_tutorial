@@ -1,8 +1,8 @@
 # Single Cell RNA Sequencing (scRNAseq) with Seurat
 
-Maiolino Aurelio - September 2025
+Maiolino Aurelio - October 2025
 
-This is still a work in progress 
+# ⚠️ **Attention:** This project is a work in progress (WIP). Features and documentation are subject to change.
 
 # Index
 
